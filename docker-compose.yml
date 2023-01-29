@@ -1,0 +1,15 @@
+version: '3.2'
+
+services:
+  timetable:
+    build: ./
+    container_name: timetable
+    ports:
+      - "8080:8080"
+    networks:
+      general:
+        aliases:
+          - timetable
+
+networks:
+  general:
