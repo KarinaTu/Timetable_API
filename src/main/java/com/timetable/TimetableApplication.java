@@ -1,5 +1,7 @@
 package com.timetable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +17,8 @@ public class TimetableApplication {
     @Autowired
     TimetableService timetableService;
 
+    private static final Logger logger = LoggerFactory.getLogger(Controller.class);
+
     public static void main(String[] args) {
 
         SpringApplication.run(TimetableApplication.class, args);
@@ -23,51 +27,52 @@ public class TimetableApplication {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-            timetableService.create();
+            timetableService.createTable();
             Scanner scanner = new Scanner(System.in);
             boolean isCorrectAnswer = false;
             while (!isCorrectAnswer) {
-                System.out.println("Do you want to start a new day?");
+                logger.info("Do you want to start a new day?");
                 String answer = scanner.nextLine();
                 if (answer.equalsIgnoreCase("YES")) {
-                    timetableService.clear();
+                    timetableService.clearTable();
+                    timetableService.setSequence();
 
                     isCorrectAnswer = true;
                 } else if (answer.equalsIgnoreCase("NO")) {
                     isCorrectAnswer = true;
                 } else {
-                    System.out.println("Answer must be 'YES' or 'NO'. Please try again.");
+                    logger.info("Answer must be 'YES' or 'NO'. Please try again.");
                 }
             }
             boolean isTimetableActive = true;
             while (isTimetableActive) {
-                System.out.println("Please choose the task: 1 = Add a new task, 2 = Amend status of existing task, 3 = Show task list in descending order, 4 = Close the timetable");
+                logger.info("Please choose the task: 1 = Add a new task, 2 = Amend status of existing task, 3 = Show task list in descending order, 4 = Close the timetable");
                 try {
                     int inputtedChoice = scanner.nextInt();
                     if (inputtedChoice < 1 || inputtedChoice > 4) {
-                        System.out.println("Incorrect selection. Please try again");
+                        logger.info("Incorrect selection. Please try again");
                     } else if (inputtedChoice == 4) {
                         isTimetableActive = false;
-                        System.out.println("Timetable is closed");
+                        logger.info("Timetable is closed");
                     } else {
                         switch (inputtedChoice) {
                             case 1 -> {
-                                System.out.println("Please clarify the name of the task");
+                                logger.info("Please clarify the name of the task");
                                 scanner.nextLine();
                                 String task = scanner.nextLine();
                                 Task task1 = new Task();
                                 task1.setTask(task);
-                                System.out.println("Please clarify the priority");
+                                logger.info("Please clarify the priority");
                                 int priority = scanner.nextInt();
                                 task1.setPriority(priority);
-                                timetableService.newTask(task1);
+                                timetableService.createTask(task1);
                             }
                             case 2 -> {
-                                System.out.println("Please clarify the task ID");
+                                logger.info("Please clarify the task ID");
                                 int id = scanner.nextInt();
                                 scanner.nextLine();
                                 Task task2 = new Task();
-                                System.out.println("Please select the new status of the task(inProgress/done/canceled)");
+                                logger.info("Please select the new status of the task(inProgress/done/canceled)");
                                 String status = scanner.nextLine();
                                 task2.setStatus(status);
                                 timetableService.updateStatus(task2, id);
@@ -76,13 +81,13 @@ public class TimetableApplication {
                             case 3 -> {
                                 List<Task> tasks = timetableService.showTasks();
                                 for (Task task : tasks) {
-                                    System.out.println("id = " + task.getId() + "; task = " + task.getTask() + "; priority = " + task.getPriority() + "; status = " + task.getStatus());
+                                    logger.info("id = " + task.getId() + "; task = " + task.getTask() + "; priority = " + task.getPriority() + "; status = " + task.getStatus());
                                 }
                             }
                         }
                     }
                 } catch (InputMismatchException e) {
-                    System.out.println("Inserted wrong number. Please try again");
+                    logger.info("Inserted wrong number. Please try again");
                     scanner.next();
                 }
             }
