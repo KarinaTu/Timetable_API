@@ -16,8 +16,8 @@ public class Controller {
     @PostMapping("/newTask")
     public String createNewTask(@RequestBody Task task) {
         logger.info("requested to create a new task");
-        timetableService.newTask(task);
-        return "new task is created";
+        Number id = timetableService.createTask(task);
+        return "new task is created with ID" + id;
     }
 
     @PutMapping("/updateStatus/{id}")
